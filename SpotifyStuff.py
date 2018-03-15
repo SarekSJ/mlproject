@@ -1,10 +1,9 @@
 import spotipy
-from pprint import pprint
+import pprint
 from spotipy import oauth2
 import requests
-from info import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+from info import CLIENT_ID, CLIENT_SECRET
 from spotipy.oauth2 import SpotifyClientCredentials
-
 
 
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
@@ -17,27 +16,75 @@ hiphop10000 = '4ga5O625dPrhIp7G6i71y8'
 
 woop = '1Zyxj9mEn9EI6t0RfYGDTY' # For testing
 
-playlists = [jazz10000, rock10000, hiphop10000]
-playlist_names = ['jazz', 'rock', 'hip_hop']
-# playlists = [jazz10000]
-for index, playlist in enumerate(playlists):
-    print('Doing ' + playlist_names[index] + '...')
-    uri = 'spotify:user:' + username + ':playlist:' + playlist
-    results = sp.user_playlist(username, playlist, fields='tracks')
-    # print(results['tracks'])
-    with open(playlist_names[index] + '_ids.txt', 'w') as f:
-        for track in results['tracks']['items']:
-            # print(track['track']['id'])
-            f.write(track['track']['uri'] + '\n')
-        results = sp.next(results['tracks'])
-        while (results['next']):
-            for track in results['items']:
-                # pprint(track['track']['id'])
-                f.write(track['track']['uri'] + '\n')
-            # print(results['next'])
-            try:
-                results = sp.next(results)
+pp = pprint.PrettyPrinter()
 
-            except:
-                break
+def get_songs_from_playlists():
+    playlists = [jazz10000, rock10000, hiphop10000]
+    playlist_names = ['jazz', 'rock', 'hip_hop']
+    # playlists = [jazz10000]
+    for index, playlist in enumerate(playlists):
+        print('Doing ' + playlist_names[index] + '...')
+        uri = 'spotify:user:' + username + ':playlist:' + playlist
+        results = sp.user_playlist(username, playlist, fields='tracks')
+        # print(results['tracks'])
+        with open(playlist_names[index] + '_ids.txt', 'w') as f:
+            for track in results['tracks']['items']:
+                # print(track['track']['id'])
+                f.write(track['track']['id'] + '\n')
+            results = sp.next(results['tracks'])
+            while (results['next']):
+                for track in results['items']:
+                    # pprint(track['track']['id'])
+                    f.write(track['track']['id'] + '\n')
+                # print(results['next'])
+                try:
+                    results = sp.next(results)
 
+                except:
+                    break
+    return
+
+######
+#
+# This function will scan through a list of spotify IDs and return song features in groups of 50 at a time.
+# Then it will strip away all the excess info and write the audio features to a file
+#
+######
+def get_track_analysis(file_num):
+    if file_num == 0:
+        filename = "jazz_ids.txt"
+    elif file_num == 1:
+        filename = "rock_ids.txt"
+    else:
+        filename = "hip_hop_ids.txt"
+    stepsize = 50
+
+    file = open(filename, "r").readlines()
+    write_file = open("analysis_"+filename, "w")
+
+    file_len = sum(1 for line in file)
+    stripped = [x.strip() for x in file]
+    # print(sp.audio_features(stripped[0]))
+    for pos in range(0, file_len, stepsize):
+        WAKANDA_FOREVER = sp.audio_features(stripped[pos:pos+stepsize])
+        for dictionary in WAKANDA_FOREVER:
+            write_file.write(str(dictionary["danceability"]) + "," +
+                             str(dictionary["energy"]) + "," +
+                             str(dictionary["key"]) + "," +
+                             str(dictionary["loudness"]) + "," +
+                             str(dictionary["mode"]) + "," +
+                             str(dictionary["speechiness"]) + "," +
+                             str(dictionary["acousticness"]) + "," +
+                             str(dictionary["instrumentalness"]) + "," +
+                             str(dictionary["liveness"]) + "," +
+                             str(dictionary["valence"]) + "," +
+                             str(dictionary["tempo"]) + "," +
+                             str(dictionary["time_signature"]) + "," +
+                             str(file_num) + '\n')
+
+    return
+
+# get_songs_from_playlists()
+for i in range(1):
+    print('doing ' + str(i) )
+    get_track_analysis(i)

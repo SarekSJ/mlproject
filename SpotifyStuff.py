@@ -10,17 +10,19 @@ client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, clien
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 username = 'syke117'
+# username = '1116650208'
 jazz10000 = '2hJBSU1hLZUVDI9WT37pmI'
 rock10000 = '3PO7Cfl1eoMcjhnq1IwByd'
 hiphop10000 = '4ga5O625dPrhIp7G6i71y8'
-
+metal10000 = '0s883mgjcHaWOv4TF4YI7C'
+classical10000 = '5mzuM0jq1oylBxjGUKRb4K'
 woop = '1Zyxj9mEn9EI6t0RfYGDTY' # For testing
 
 pp = pprint.PrettyPrinter()
 
 def get_songs_from_playlists():
-    playlists = [jazz10000, rock10000, hiphop10000]
-    playlist_names = ['jazz', 'rock', 'hip_hop']
+    playlists = [classical10000]
+    playlist_names = ['classical']
     # playlists = [jazz10000]
     for index, playlist in enumerate(playlists):
         print('Doing ' + playlist_names[index] + '...')
@@ -52,11 +54,13 @@ def get_songs_from_playlists():
 ######
 def get_track_analysis(file_num):
     if file_num == 0:
-        filename = "jazz_ids.txt"
+        filename = "classical_ids.txt"
     elif file_num == 1:
         filename = "rock_ids.txt"
-    else:
+    elif file_num == 2:
         filename = "hip_hop_ids.txt"
+    elif file_num == 3:
+        filename = "classical_ids.txt"
     stepsize = 50
 
     file = open(filename, "r").readlines()
@@ -68,23 +72,24 @@ def get_track_analysis(file_num):
     for pos in range(0, file_len, stepsize):
         WAKANDA_FOREVER = sp.audio_features(stripped[pos:pos+stepsize])
         for dictionary in WAKANDA_FOREVER:
-            write_file.write(str(dictionary["danceability"]) + "," +
-                             str(dictionary["energy"]) + "," +
-                             str(dictionary["key"]) + "," +
-                             str(dictionary["loudness"]) + "," +
-                             str(dictionary["mode"]) + "," +
-                             str(dictionary["speechiness"]) + "," +
-                             str(dictionary["acousticness"]) + "," +
-                             str(dictionary["instrumentalness"]) + "," +
-                             str(dictionary["liveness"]) + "," +
-                             str(dictionary["valence"]) + "," +
-                             str(dictionary["tempo"]) + "," +
-                             str(dictionary["time_signature"]) + "," +
-                             str(file_num) + '\n')
+            if dictionary is not None:
+                write_file.write(str(dictionary["danceability"]) + "," +
+                                 str(dictionary["energy"]) + "," +
+                                 str(dictionary["key"]) + "," +
+                                 str(dictionary["loudness"]) + "," +
+                                 str(dictionary["mode"]) + "," +
+                                 str(dictionary["speechiness"]) + "," +
+                                 str(dictionary["acousticness"]) + "," +
+                                 str(dictionary["instrumentalness"]) + "," +
+                                 str(dictionary["liveness"]) + "," +
+                                 str(dictionary["valence"]) + "," +
+                                 str(dictionary["tempo"]) + "," +
+                                 str(dictionary["time_signature"]) + "," +
+                                 str(file_num) + '\n')
 
     return
 
 # get_songs_from_playlists()
-for i in range(1):
-    print('doing ' + str(i) )
+for i in range(4):
+    print('doing ' + str(i))
     get_track_analysis(i)
